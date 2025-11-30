@@ -1,23 +1,4 @@
-.app-header {
-  background-color: #282c34;
-  padding: 20px;
-  color: white;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.app-header h1 {
-  margin: 0;
-  font-size: 1.5em;
-}
-
-.app-header nav a {
-  color: white;
-  margin: 0 15px;
-  text-decoration: none;
-}
-
-.app-header nav a:hover {
-  text-decoration: underline;
-}
+.site-header { display:flex; align-items:center; justify-content:space-between; padding:12px 18px; background: linear-gradient(90deg,#0f172a,#0b1220); color: white; border-radius: 8px; }
+.brand { font-weight:700; font-size:20px; }
+.site-header nav ul { list-style:none; display:flex; gap:12px; margin:0; padding:0; }
+.site-header nav li { opacity:0.9; cursor:pointer; }

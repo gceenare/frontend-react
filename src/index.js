@@ -1,11 +1,17 @@
 import React from 'react';
-import ReactDOM from 'react-dom/client';
-import './index.css';
+import { createRoot } from 'react-dom/client';
+import { BrowserRouter } from 'react-router-dom';
 import App from './App';
+import { CartProvider } from './contexts/CartContext';
+import { ToastProvider } from './contexts/ToastContext'; // Import ToastProvider
+import './index.css';
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
+createRoot(document.getElementById('root')).render(
+  <BrowserRouter>
+    <ToastProvider> {/* Wrap with ToastProvider */}
+      <CartProvider>
+        <App />
+      </CartProvider>
+    </ToastProvider>
+  </BrowserRouter>
 );

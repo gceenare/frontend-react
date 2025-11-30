@@ -1,17 +1,26 @@
 import React from 'react';
-import './Header.css';
+import { Link } from 'react-router-dom';
+import { useCart } from '../contexts/CartContext';
 
-function Header() {
+export default function Header() {
+  const { cart } = useCart();
+  const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+  // Removed token and handleLogout as security is removed
+
   return (
-    <header className="app-header">
-      <h1>EcomTech</h1>
+    <header className="bg-gray-800 text-white p-4 flex justify-between items-center">
+      <Link to="/" className="text-xl font-bold">E-Commerce</Link>
       <nav>
-        <a href="/">Home</a>
-        <a href="/products">Products</a>
-        <a href="/cart">Cart</a>
+        <ul className="flex space-x-4">
+          <li><Link to="/products">Products</Link></li>
+          <li><Link to="/cart">Cart ({totalItems})</Link></li>
+          {/* All links are now visible as security is removed */}
+          <li><Link to="/login">Login</Link></li>
+          <li><Link to="/register">Register</Link></li>
+          <li><Link to="/admin/products">Admin Products</Link></li>
+          <li><Link to="/admin/orders">Admin Orders</Link></li>
+        </ul>
       </nav>
     </header>
   );
 }
-
-export default Header;
