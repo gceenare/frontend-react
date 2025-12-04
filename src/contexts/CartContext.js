@@ -1,26 +1,38 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import api from '../api';
-import { useToast } from './ToastContext'; // Import useToast
+import api, { getProduct } from '../api'; // Import getProduct
+import { useToast } from './ToastContext';
 
 const CartContext = createContext();
 export const useCart = () => useContext(CartContext);
 
+const CART_STORAGE_KEY = 'shopping-cart';
+
 export function CartProvider({ children }){
-  const [cart, setCart] = useState([]); // Renamed 'items' to 'cart'
+  const [cart, setCart] = useState(() => {
+    try {
+      const storedCart = localStorage.getItem(CART_STORAGE_KEY);
+      return storedCart ? JSON.parse(storedCart) : [];
+    } catch (error) {
+      console.error("Could not parse cart from localStorage", error);
+      return [];
+    }
+  });
   const [loading, setLoading] = useState(false);
-  const { showToast } = useToast(); // Get showToast function
+  const { showToast } = useToast();
+
+  useEffect(() => {
+    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
+  }, [cart]);
 
   async function load(){
-    // Removed token check as security is no longer enforced
     setLoading(true);
     try{
       const res = await api.get('/cart');
-      setCart(res.data || []); // Use setCart
+      setCart(res.data || []);
     }catch(e){
-      // If loading cart fails, clear it and show an error
-      setCart([]); // Use setCart
-      console.error("Failed to load cart:", e);
-      showToast("Failed to load cart.", "error");
+      setCart([]);
+      console.error("Failed to load cart from server:", e);
+      showToast({ message: "Failed to sync cart with server.", type: "error" });
     }
     setLoading(false);
   }
@@ -29,12 +41,24 @@ export function CartProvider({ children }){
 
   async function add(productId, qty=1){
     try {
+      // Fetch product details for the toast
+      const productDetails = await getProduct(productId);
+
       await api.post('/cart/add', { productId, quantity: qty });
-      await load();
-      showToast("Item added to cart!", "success");
+      await load(); // Reload cart to get updated state from server
+
+      showToast({
+        message: `${productDetails.name} added to cart!`,
+        type: "success",
+        product: {
+          name: productDetails.name,
+          imageUrl: productDetails.imageUrl
+        },
+        undoAction: () => remove(productId) // Pass a function to undo this specific add
+      });
     } catch (e) {
       console.error("Failed to add item to cart:", e);
-      showToast(e.response?.data || "Failed to add item to cart.", "error");
+      showToast({ message: e.response?.data?.message || "Failed to add item to cart.", type: "error" });
     }
   }
 
@@ -42,10 +66,10 @@ export function CartProvider({ children }){
     try {
       await api.post('/cart/remove', { productId });
       await load();
-      showToast("Item removed from cart.", "success");
+      showToast({ message: "Item removed from cart.", type: "success" });
     } catch (e) {
       console.error("Failed to remove item from cart:", e);
-      showToast(e.response?.data || "Failed to remove item from cart.", "error");
+      showToast({ message: e.response?.data?.message || "Failed to remove item from cart.", type: "error" });
     }
   }
 
@@ -53,15 +77,21 @@ export function CartProvider({ children }){
     try {
       await api.post('/cart/update', { productId, quantity });
       await load();
-      showToast("Cart updated.", "success");
+      showToast({ message: "Cart updated.", type: "success" });
     } catch (e) {
       console.error("Failed to update cart:", e);
-      showToast(e.response?.data || "Failed to update cart.", "error");
+      showToast({ message: e.response?.data?.message || "Failed to update cart.", type: "error" });
     }
   }
 
+  function clearCart() {
+    setCart([]);
+    // Optionally, also clear on the backend if needed
+    // api.post('/cart/clear');
+  }
+
   return (
-    <CartContext.Provider value={{ cart, add, remove, update, load, loading }}> {/* Expose 'cart' */}
+    <CartContext.Provider value={{ cart, add, remove, update, load, loading, clearCart }}>
       {children}
     </CartContext.Provider>
   );

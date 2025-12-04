@@ -8,34 +8,42 @@ import CartPage from './pages/CartPage';
 import CheckoutPage from './pages/CheckoutPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
-import AdminProducts from './pages/admin/AdminProducts';
-import AdminOrders from './pages/admin/AdminOrders';
-// import ProtectedRoute from './components/ProtectedRoute'; // Removed ProtectedRoute import
+import ProfilePage from './pages/ProfilePage';
+import WishlistPage from './pages/WishlistPage';
+import AdminPage from './pages/AdminPage';
+import OrderDetailsPage from './pages/OrderDetailsPage';
+import ProtectedRoute from './components/ProtectedRoute';
 import ToastContainer from './components/ToastContainer';
+import WelcomePopup from './components/WelcomePopup'; // Import WelcomePopup
 
-export default function App(){
+export default function App() {
   return (
-    <div className="app container">
+    <div className="flex flex-col min-h-screen app-container">
       <Header />
-      <main style={{paddingTop:20}}>
+      <main className="flex-grow">
         <Routes>
-          <Route path="/" element={<HomePage/>} />
-          <Route path="/products" element={<ProductListPage/>} />
-          <Route path="/product/:id" element={<ProductDetailsPage/>} />
-          <Route path="/cart" element={<CartPage/>} />
-          {/* Removed ProtectedRoute wrapper */}
-          <Route path="/checkout" element={<CheckoutPage/>} />
-          <Route path="/login" element={<LoginPage/>} />
-          <Route path="/register" element={<RegisterPage/>} />
+          {/* Public Routes */}
+          <Route path="/" element={<HomePage />} />
+          <Route path="/products" element={<ProductListPage />} />
+          <Route path="/product/:id" element={<ProductDetailsPage />} />
+          <Route path="/cart" element={<CartPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
 
-          {/* Admin routes - now directly accessible */}
-          <Route path="/admin/products" element={<AdminProducts/>} />
-          <Route path="/admin/orders" element={<AdminOrders/>} />
+          {/* Protected Routes */}
+          <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+          <Route path="/checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
+          <Route path="/wishlist" element={<ProtectedRoute><WishlistPage /></ProtectedRoute>} />
+          <Route path="/order/:id" element={<ProtectedRoute><OrderDetailsPage /></ProtectedRoute>} />
 
+          {/* Admin Routes */}
+          <Route path="/admin" element={<ProtectedRoute adminOnly={true}><AdminPage /></ProtectedRoute>} />
+          
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
       <ToastContainer />
+      <WelcomePopup /> {/* Render WelcomePopup */}
     </div>
   );
 }
